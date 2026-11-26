@@ -10,7 +10,7 @@ function input(field) {
     el('option',{value:'false', selected:fallback(field) === false ? '' : undefined},'否'));
   if (field.kind === 'json') return el('textarea', {name:field.name, required:''}, JSON.stringify(fallback(field), null, 2));
   const numeric = ['int','float'].includes(field.kind);
-  return el('input',{name:field.name, required:'', type:numeric ? 'number' : 'text',
+  return el('input',{name:field.name, required:field.required === false ? undefined : '', type:numeric ? 'number' : 'text',
     step:field.kind === 'float' ? 'any' : undefined, value:fallback(field) ?? ''});
 }
 function parse(form, fields) {

@@ -25,6 +25,14 @@
       "label": "照片来源观察"
     },
     {
+      "name": "photo_receipt",
+      "label": "照片回执"
+    },
+    {
+      "name": "same_room_receipt",
+      "label": "同房回执"
+    },
+    {
       "name": "permit_snapshot",
       "label": "本次书面授权快照"
     },
@@ -142,6 +150,44 @@
         "reviewer"
       ],
       "success": "已写入"
+    },
+    {
+      "name": "change_receipt",
+      "label": "复约换同房回执 / 更换照片来源",
+      "path": "/key_handoffs/change-receipt",
+      "fields": [
+        {
+          "name": "handoff",
+          "label": "交接/复约号",
+          "kind": "text",
+          "initial": "KEYPLAN-QA"
+        },
+        {
+          "name": "proof_visit",
+          "label": "同房照片来源观察",
+          "kind": "text",
+          "initial": "V-ZERO-QA"
+        },
+        {
+          "name": "photo_receipt",
+          "label": "核验照片回执",
+          "kind": "text",
+          "initial": "PHOTO-QA-ZERO"
+        },
+        {
+          "name": "forecast",
+          "label": "新签认估计（失效重算后填写）",
+          "kind": "text",
+          "initial": "",
+          "required": false
+        }
+      ],
+      "help": "原照片转走后，未签出的复约必须改挂本房观察回执；若旧估计失效，同时填入新签认估计后再签出钥匙。已借出的钥匙仍按原单归还。",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "success": "已更换"
     },
     {
       "name": "cancel_booking",

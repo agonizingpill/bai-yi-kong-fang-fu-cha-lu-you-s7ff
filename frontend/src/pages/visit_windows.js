@@ -125,6 +125,31 @@
         "reviewer"
       ],
       "success": "已写入"
+    },
+    {
+      "name": "transfer_record",
+      "label": "转记/转移到正确房间：实见数和原照片回执",
+      "path": "/visit_windows/transfer-record",
+      "fields": [
+        {
+          "name": "code",
+          "label": "要转走的观察窗号",
+          "kind": "text",
+          "initial": "V-ZERO-QA"
+        },
+        {
+          "name": "room_code",
+          "label": "正确空房编号",
+          "kind": "text",
+          "initial": "ROOM-22"
+        }
+      ],
+      "help": "实见数与原 PHOTO 回执整体转到正确房间；正确房间当天已有窗口会整笔退回。两房目标日复访估计失效，须重新计算并签认。",
+      "roles": [
+        "operator",
+        "reviewer"
+      ],
+      "success": "已转记"
     }
   ]
 };

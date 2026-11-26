@@ -13,6 +13,10 @@
       "label": "编号"
     },
     {
+      "name": "status",
+      "label": "估计状态"
+    },
+    {
       "name": "room_code",
       "label": "空房"
     },

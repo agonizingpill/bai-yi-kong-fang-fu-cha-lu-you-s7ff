@@ -5,6 +5,7 @@ from core.audit import record
 from core.db import transaction
 from core.records import scan
 from domain import return_forecasts_service as service
+from domain.forecast_rules import public_forecast
 from domain.return_forecasts_model import return_forecasts
 from domain.return_forecasts_schemas import FitReturn, SignReturn
 
@@ -13,7 +14,7 @@ router = APIRouter()
 @router.get('/return_forecasts')
 def list_return_forecasts(user=Depends(actor)):
     with transaction() as conn:
-        return scan(conn, return_forecasts)
+        return [public_forecast(row) for row in scan(conn, return_forecasts)]
 
 
 @router.post('/return_forecasts/fit-return')
@@ -31,4 +32,4 @@ def sign_return(data: SignReturn, user=Depends(actor)):
     with transaction() as conn:
         output = service.sign_return(conn, user, data)
         record(conn, user, 'return_forecasts.sign_return')
-        return output
+        return public_forecast(output)

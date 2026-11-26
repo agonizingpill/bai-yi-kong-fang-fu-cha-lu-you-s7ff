@@ -8,7 +8,7 @@
 
 - 空房与授权簿 `vacant_rooms`，字段为 `building`（业主单位）、`room`（空房门牌）、`contact_ref`（归档联系人）、`key_tag`（钥匙牌）、`permit_ref`（书面授权）、`permit_until`（授权截止）、`status`（授权状态）。模型约束位于 `backend/domain/vacant_rooms_model.py`，规则位于 `vacant_rooms_service.py`。
 - 观察窗口与拒入 `visit_windows`，字段为 `room_code`（空房）、`visit_day`（预约日期）、`activity_count`（实见活动数）、`status`（观察状态）、`photo_receipt`（照片回执）、`desk_note`（观察或拒入记录）。模型约束位于 `backend/domain/visit_windows_model.py`，规则位于 `visit_windows_service.py`。
-- 复访间隔簿 `return_forecasts`，字段为 `room_code`（空房）、`target_day`（拟复访日期）、`prediction`（估计实见活动数）、`lag_count`（最近一次实见值）、`gap_days`（距最近实见天数）、`holdout_mae`（末段留出 MAE）、`skipped_refusals`（跳过的拒入窗口数）、`token`（后台评估凭证）。模型约束位于 `backend/domain/return_forecasts_model.py`，规则位于 `return_forecasts_service.py`。
+- 复访间隔簿 `return_forecasts`，字段为 `room_code`（空房）、`target_day`（拟复访日期）、`prediction`（估计实见活动数）、`lag_count`（最近一次实见值）、`gap_days`（距最近实见天数）、`holdout_mae`（末段留出 MAE）、`skipped_refusals`（跳过的拒入窗口数）、`token`（后台评估凭证）、`status`（有效或已失效）。模型约束位于 `backend/domain/return_forecasts_model.py`，规则位于 `return_forecasts_service.py`。
 - 再授权与钥匙交接 `key_handoffs`，字段为 `room_code`（空房）、`forecast`（复查签认）、`proof_visit`（照片来源观察）、`permit_snapshot`（本次书面授权快照）、`visit_date`（拟交接日期）、`key_tag`（钥匙交接牌）、`team_member`（带钥负责人）、`status`（交接状态）、`receipt`（钥匙回单）。模型约束位于 `backend/domain/key_handoffs_model.py`，规则位于 `key_handoffs_service.py`。
 
 团队为模拟的8 人房屋养护班，安排空房复查及房东授权。
@@ -52,12 +52,14 @@ Compose 运行 Nginx、Python FastAPI、独立 Redis 消费进程、SQL 数据�
 | 业务任务 | FastAPI 路由 | 页面 |
 |---|---|---|
 | 空房与授权簿 | `/vacant_rooms` /vacant_rooms/renew-permit | `frontend/src/pages/vacant_rooms.js` |
-| 观察窗口与拒入 | `/visit_windows` /visit_windows/record-count，/visit_windows/register-refusal | `frontend/src/pages/visit_windows.js` |
+| 观察窗口与拒入 | `/visit_windows` /visit_windows/record-count，/visit_windows/register-refusal，/visit_windows/transfer-record | `frontend/src/pages/visit_windows.js` |
 | 复访间隔簿 | `/return_forecasts` /return_forecasts/fit-return，/return_forecasts/sign-return | `frontend/src/pages/return_forecasts.js` |
-| 再授权与钥匙交接 | `/key_handoffs` /key_handoffs/book-revisit，/key_handoffs/release-key，/key_handoffs/return-key | `frontend/src/pages/key_handoffs.js` |
+| 再授权与钥匙交接 | `/key_handoffs` /key_handoffs/book-revisit，/key_handoffs/release-key，/key_handoffs/return-key，/key_handoffs/change-receipt | `frontend/src/pages/key_handoffs.js` |
 
 SQL 实体与约束在 `backend/domain` 下维护。前端使用原生 ES modules。核心算子为 对数线性滞后回归。在 log(1+实见值) 上对上次实见量和前次实际到访间隔进行线性回归。历史按日期切分，尾段留出，逆变换后报告 MAE。拒入窗口不上样，日期间隔跨过它，实见 0 保留。
 
 只使用模拟空房观察计数和书面授权代号。系统不读取照片本体，不接入门锁。训练预测不用于现场种群诊断或防治。拒入授权挂起后，若已发出的复约授权变化，签出会阻止。
+
+挂错空房的已观测窗口可用 `/visit_windows/transfer-record` 将实见数和原 `PHOTO-` 回执在同一事务内改挂正确房间；接收房同日已有任意窗口则整笔退回。转记日后于该实见日的两房估计会置为 `已失效`，旧排队凭证的历史快照校验仍会阻止签认；失效估计可用原签认编号重算后覆盖签认。未签出复约的照片来源须用 `/key_handoffs/change-receipt` 换成本房回执，必要时同时挂接新签认；已签出钥匙仍按原交接单归还。
 
 [MIT](LICENSE)
